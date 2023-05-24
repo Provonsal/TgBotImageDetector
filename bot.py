@@ -285,7 +285,7 @@ DO NOT press the button "Load files again" until it end otherwise it wont proces
         process_creater(0, NeurN, message)
         
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width = 1)
-        button_1 = telebot.types.KeyboardButton('Load Files again')
+        button_1 = telebot.types.KeyboardButton('Load files again')
         
         
         markup.add(button_1)
