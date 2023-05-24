@@ -17,7 +17,6 @@ vid_have_downloaded = []
 
 def load_img(message):
     def download_images(message):
-        global b, ph_have_downloaded, ph_should_be_download
         file_info = bot.get_file(message.photo[-1].file_id)
         
         downloaded_file = bot.download_file(file_info.file_path)
@@ -27,12 +26,13 @@ def load_img(message):
         file_name = file_info.file_path.replace('photos/', '')
         
         src = 'bot-images/'+ user_id + file_name
-        ph_should_be_download.append(src)
+        
         print(src)
         with open(src, 'wb') as new_file:
             new_file.write(downloaded_file)
+        
         text = f'{file_name} have loaded'
-        ph_have_downloaded.append(src)
+        
         
         bot.send_message(message.chat.id, text)
        
@@ -90,18 +90,18 @@ def load_vid(message):
             c = 1
         
 def NeurN(message): 
-    
+    from detect import run as NN
     chat = message.chat.id
     user_id = str(message.from_user.id)
     path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/'
-    #NN(**{'source':path, 'project':path})
+    NN(**{'source':path, 'project':path})
     def sending_back(chat):
-        
+        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp'
         arti = os.listdir(path) # list of directory
         medias = [] # help list
         photos = [] # list for photo
         videos = [] # list for videos
-        def suka(medias, photos, chat, path):
+        def suka(medias, photos, chat):
             
             photos = photos
             photos_copy = photos.copy()
@@ -109,7 +109,10 @@ def NeurN(message):
             for i in photos:
                 print('first')
                 print('len of medias: ',len(medias))
-                if len(medias) == 10:
+                if len(photos) < 10:
+                    
+                    break
+                elif len(medias) == 10:
                     print('sosat')
                     bot.send_media_group(chat, medias)
                         
@@ -128,14 +131,16 @@ def NeurN(message):
                 with open(f'{path}{i}', 'rb') as photo:
                     bot.send_photo(chat,photo)
                     medias = []
+            
         
-        def blyat(videos, chat, path):
+        def blyat(videos, chat):
             for i in videos:
                 print('second')
                 print('len of videos: ', len(videos))
                 with open(f'{path}{i}', 'rb') as video:
                     print(i)
-                    bot.send_video(chat,video) 
+                    bot.send_video(chat,video)
+            
         for i in arti:
             format = Path(f'{path}{i}').suffix
             if format == '.png' or format == '.jpg' or format == '.jpeg':
@@ -144,30 +149,39 @@ def NeurN(message):
             elif format == '.mp4':
                 print('dva')
                 videos.append(i)
-        suka(medias, photos, chat, path)
+        suka(medias, photos, chat)
+        #process_creater(3, suka, message, {'medias':medias, 'photos':photos, 'chat':chat, 'path':path})
+        #process_creater(3, blyat, message, {'videos':videos, 'chat':chat, 'path':path})
         print('func video')
-        blyat(videos, chat, path)
-        bot.send_message(chat, 'All processed files have sended. \n Deleting them from my storage...')
-        time.sleep(3)
-        def deleting(arti):
-        
-            for i in arti:
-                print(i)
-                if i != 'exp' and os.path.isfile(path + i):
-                    
-                    os.remove(path+i)
-                    
-                if i == 'exp':
-                    shutil.rmtree(path + i)
+        blyat(videos, chat)
+        def deleting():
+            path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}'
             
-        #deleting(arti)
-        bot.send_message(chat, 'All processed files have deleted. \n ')
+            
+            #if i != 'exp' and os.path.isfile(path + i):
+                    
+            #    os.remove(path+i)
+                    
+            
+                
+            shutil.rmtree(path)
+            
+        #bot.send_message(chat, 'All processed files have sended. \n Deleting them from my storage...')
+        #time.sleep(10)
+        #deleting()
     sending_back(chat)
+    
+    
+        
+    #bot.send_message(chat, 'All processed files have deleted. \n ')
 
-def process_creater(file, func, message):
+def process_creater(file, func, message, kwargs={}):
     
     if file == True:
         proc1 = multiprocessing.Process(target = func, args=(message,))
+        proc1.start()
+    if file == 3:
+        proc1 = multiprocessing.Process(target = func, kwargs=kwargs)
         proc1.start()
     else:
         proc2 = multiprocessing.Process(target = func, args=(message,))
@@ -200,6 +214,9 @@ def main1(message):
 def bum(message):
     def bum2(message):
         global a, b
+        chat = message.chat.id
+        user_id = str(message.from_user.id)
+        
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width = 1)
         button_1 = telebot.types.KeyboardButton('End Loading')
         
@@ -211,7 +228,21 @@ def bum(message):
     
         a = 2
         b = 1
-        
+        def deleting():
+            path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}'
+            
+            
+            #if i != 'exp' and os.path.isfile(path + i):
+                    
+            #    os.remove(path+i)
+                    
+            
+                
+            shutil.rmtree(path)
+            
+        bot.send_message(chat, 'хуй. \n Deleting them from my storage...')
+        time.sleep(10)
+        deleting()
     if a == 1:
         bum2(message)
     

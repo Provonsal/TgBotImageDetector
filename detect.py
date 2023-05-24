@@ -33,9 +33,9 @@ import os
 import platform
 import sys
 from pathlib import Path
-
+import time
 import torch
-
+import shutil
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -48,11 +48,9 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
                            increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
-import telebot
 
-bot = telebot.TeleBot('6086665182:AAHhUQiu6Crx_RaDUkSML3Ws9sZDCzaeDsg')
-b = 0
-medias = []
+
+
 @smart_inference_mode()
 def run(
         weights=ROOT / 'runs/train/exp12/weights/best.pt',  # model path or triton URL
@@ -82,10 +80,9 @@ def run(
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
-        message=0
+        
 ):
-    b = 0
-    medias = []
+    
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -266,12 +263,3 @@ def main(opt):
     run(**vars(opt))
 
 
-#run()
-#@bot.message_handler(commands=['start'])
-#def mains(message):
-    #bot.send_message(message.chat.id, 'ok')
-    #print('1')
-    
-    
-    
-#bot.polling(none_stop = True)
