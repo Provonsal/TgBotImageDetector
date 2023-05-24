@@ -195,11 +195,11 @@ def main1(message):
         button_1 = telebot.types.KeyboardButton('Load files')
         
         text = """1 Hello, stranger. 
-    If you want me to recognize images on your screenshot\video, then send me it and i'll send you back processed images\video.
+If you want me to recognize images on your screenshot\video, then send me it and i'll send you back processed images\video.
         
-    Send me the images or videos(50mb max size due Telegram restrictions) and i'll load them.
+Send me the images or videos(50mb max size due Telegram restrictions) and i'll load them.
 
-    After you send me your files, wait a while (about 5-6 seconds for 10 images and 10-20 seconds for videos)
+After you send me your files, wait a while (about 5-6 seconds for 10 images and 10-20 seconds for videos)
 
 
     """
