@@ -56,7 +56,7 @@ def load_vid(message):
     
     
     def download_videos(message):
-        global c, vid_have_downloaded, vid_should_be_download
+        
         file_info = bot.get_file(message.video.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
         user_id = str(message.from_user.id) + '/'
@@ -64,13 +64,12 @@ def load_vid(message):
             os.mkdir('bot-images/' + user_id) 
         file_name = message.video.file_name
         src = 'bot-images/'+ user_id + file_name
-        vid_should_be_download.append(src)
-        print(vid_should_be_download)
+        
+        print(file_name)
         with open(src, 'wb') as new_file:
             new_file.write(downloaded_file)
-        text = f'{file_name} have loaded'
-        vid_have_downloaded.append(src)
         
+        text = f'{file_name} have loaded'
         bot.send_message(message.chat.id, text)
         
     download_videos(message)
@@ -96,7 +95,7 @@ def NeurN(message):
     path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/'
     NN(**{'source':path, 'project':path})
     def sending_back(chat):
-        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp'
+        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp/'
         arti = os.listdir(path) # list of directory
         medias = [] # help list
         photos = [] # list for photo
@@ -193,7 +192,7 @@ def main1(message):
     
         global a
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width = 1)
-        button_1 = telebot.types.KeyboardButton('Load Files')
+        button_1 = telebot.types.KeyboardButton('Load files')
         
         text = """1 Hello, stranger. 
     If you want me to recognize images on your screenshot\video, then send me it and i'll send you back processed images\video.
@@ -210,7 +209,7 @@ def main1(message):
     main2(message)
         
     
-@bot.message_handler(func=lambda message: message.text == "Load Files") # 22222222222222222222222222222222222
+@bot.message_handler(func=lambda message: message.text == "Load files" or message.text == "Load files again") # 22222222222222222222222222222222222
 def bum(message):
     def bum2(message):
         global a, b
@@ -218,42 +217,37 @@ def bum(message):
         user_id = str(message.from_user.id)
         
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width = 1)
-        button_1 = telebot.types.KeyboardButton('End Loading')
+        button_1 = telebot.types.KeyboardButton('End loading')
         
-        text = """2 Okay, send me your files to load. I'll load them"""
+        text = """Okay, send me your files to load. I'll load them"""
         
         markup.add(button_1)
         
         bot.send_message(message.chat.id, text, reply_markup = markup)
     
-        a = 2
-        b = 1
+        
         def deleting():
             path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}'
-            
-            
-            #if i != 'exp' and os.path.isfile(path + i):
-                    
-            #    os.remove(path+i)
-                    
-            
-                
             shutil.rmtree(path)
+            time.sleep(5)
+            bot.send_message(chat, 'Deleting complete. Now you can send me files')
             
-        bot.send_message(chat, 'хуй. \n Deleting them from my storage...')
-        time.sleep(10)
+        bot.send_message(chat, 'Deleting previous files from my storage...')
+        
         deleting()
+        a = 2
+        b = 1
     if a == 1:
         bum2(message)
     
-@bot.message_handler(func=lambda message: message.text == "End Loading") # 3333333333333333333333333333333333333333
+@bot.message_handler(func=lambda message: message.text == "End loading") # 3333333333333333333333333333333333333333
 def end_loading(message):
     def end_loading1(message):
         global a, b
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width = 1)
         button_1 = telebot.types.KeyboardButton('Process the files')
         
-        text = """3 Okay, send me your files to load. I'll load them"""
+        text = """Okay, loading is done, now press the button "Process the files" and magic begin """
         
         markup.add(button_1)
         
@@ -282,18 +276,17 @@ def checker(message):
 def rep1(message):
     def rep2(message):
         global a
-        text = """4 Well let's start.
-    It will take some time, please wait.
-    Results will be automaticaly sended here.
+        text = """Well let's start.
+It will take some time, please wait.
+Results will be automaticaly sended here.
+DO NOT press the button "Load files again" until it end otherwise it wont process the files.
     """
-        msg = bot.send_message(message.chat.id, text)
-        user_id = str(message.from_user.id)
+        
         process_creater(0, NeurN, message)
         
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width = 1)
-        button_1 = telebot.types.KeyboardButton('Load Files')
+        button_1 = telebot.types.KeyboardButton('Load Files again')
         
-        text = """4 If you want to process new files then load them again by clicking the botton below"""
         
         markup.add(button_1)
         
