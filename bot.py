@@ -37,25 +37,23 @@ def load_img(message):
 
 def load_vid(message):
     
+    file_info = bot.get_file(message.video.file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    user_id = str(message.from_user.id) + '/'
+    if not os.path.isdir('bot-images/' + user_id):
+        os.mkdir('bot-images/' + user_id) 
+    file_name = message.video.file_id + '.mp4'
+    print(message, type(user_id), type(file_name))
+    src = 'bot-images/'+ user_id + file_name
+        
+        
+    with open(src, 'wb') as new_file:
+        new_file.write(downloaded_file)
+        
+    text = f'{file_name} have loaded'
+    bot.send_message(message.chat.id, text)
+        
     
-    def download_videos(message):
-        
-        file_info = bot.get_file(message.video.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-        user_id = str(message.from_user.id) + '/'
-        if not os.path.isdir('bot-images/' + user_id):
-            os.mkdir('bot-images/' + user_id) 
-        file_name = message.video.file_name
-        src = 'bot-images/'+ user_id + file_name
-        
-        print(file_name)
-        with open(src, 'wb') as new_file:
-            new_file.write(downloaded_file)
-        
-        text = f'{file_name} have loaded'
-        bot.send_message(message.chat.id, text)
-        
-    download_videos(message)
         
 def NeurN(message): 
     from detect import run as NN
@@ -116,20 +114,22 @@ def NeurN(message):
                 photos.append(i)
             elif format == '.mp4':
                 print('dva')
+                print(i)
                 videos.append(i)
         suka(medias, photos, chat)
         blyat(videos, chat)
+        bot.send_message(chat, 'All processed files have sent. Now you can press "Load files again" and try again')
         
     sending_back(chat)
 
 def process_creater(file, func, message, kwargs={}):
     
-    if file == True:
+    if file == 1:
         proc1 = multiprocessing.Process(target = func, args=(message,))
         proc1.start()
-    if file == 3:
-        proc1 = multiprocessing.Process(target = func, kwargs=kwargs)
-        proc1.start()
+    if file == 0:
+        proc2 = multiprocessing.Process(target = func, args=(message,))
+        proc2.start()
     else:
         proc2 = multiprocessing.Process(target = func, args=(message,))
         proc2.start()
@@ -143,11 +143,12 @@ def main1(message):
         button_1 = telebot.types.KeyboardButton('Load files')
         
         text = """Hello, stranger. 
+
 If you want me to recognize images on your screenshot\video, then press the button "Load files" and follow the instructions.
         
 After you send me your files, wait a while to let my pc download files
 
-
+Please do not break the sequence of actions.
     """
         markup.add(button_1)
         bot.send_message(message.chat.id, text, reply_markup = markup)
@@ -174,7 +175,10 @@ def bum(message):
         
         def deleting():
             path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}'
-            shutil.rmtree(path)
+            try:
+                shutil.rmtree(path)
+            except:
+                return
             time.sleep(5)
             bot.send_message(chat, 'Deleting complete. Now you can send me files')
             
@@ -183,8 +187,8 @@ def bum(message):
         deleting()
         a = 2
         b = 1
-    if a == 1:
-        bum2(message)
+    
+    bum2(message)
     
 @bot.message_handler(func=lambda message: message.text == "End loading") # 3333333333333333333333333333333333333333
 def end_loading(message):
@@ -200,18 +204,20 @@ def end_loading(message):
         bot.send_message(message.chat.id, text, reply_markup = markup)
         a = 3
         b = 0
-    if a == 2:
-        end_loading1(message)
+    
+    end_loading1(message)
 
 @bot.message_handler(content_types=['photo', 'video'])   # 44444444444444444444444444444444444444444 
 def checker(message):
-    global a, b, c
+    global b
     def loader(message):        
         content = message.content_type
         if content == 'photo':
+            time.sleep(1)
             process_creater(1, load_img, message)
         elif content == 'video':
-            process_creater(1, load_vid, message)
+            time.sleep(1)
+            process_creater(0, load_vid, message)
     
         
         
@@ -224,7 +230,7 @@ def rep1(message):
         global a
         text = """Well let's start.
 It will take some time, please wait.
-Results will be automaticaly sended here.
+Results will be automaticaly send here.
 DO NOT press the button "Load files again" until it end otherwise it wont process the files.
     """
         
@@ -238,11 +244,9 @@ DO NOT press the button "Load files again" until it end otherwise it wont proces
         
         bot.send_message(message.chat.id, text, reply_markup = markup)
         a = 1
-    if a == 3:
-        rep2(message)
+    rep2(message)
 
   
-
     
 
     
