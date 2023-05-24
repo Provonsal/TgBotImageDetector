@@ -101,7 +101,7 @@ def NeurN(message):
         medias = [] # help list
         photos = [] # list for photo
         videos = [] # list for videos
-        def suka(medias, photos):
+        def suka(medias, photos, chat, path):
             
             photos = photos
             photos_copy = photos.copy()
@@ -129,20 +129,24 @@ def NeurN(message):
                     bot.send_photo(chat,photo)
                     medias = []
         
-        def blyat(videos):
+        def blyat(videos, chat, path):
             for i in videos:
+                print('second')
+                print('len of videos: ', len(videos))
                 with open(f'{path}{i}', 'rb') as video:
                     print(i)
                     bot.send_video(chat,video) 
         for i in arti:
-            
             format = Path(f'{path}{i}').suffix
-            if format == '.png' or '.jpg' or '.jpeg':
+            if format == '.png' or format == '.jpg' or format == '.jpeg':
+                print('raz')
                 photos.append(i)
             elif format == '.mp4':
+                print('dva')
                 videos.append(i)
-        suka(medias, photos, chat)
-        blyat(videos, chat)
+        suka(medias, photos, chat, path)
+        print('func video')
+        blyat(videos, chat, path)
         bot.send_message(chat, 'All processed files have sended. \n Deleting them from my storage...')
         time.sleep(3)
         def deleting(arti):
