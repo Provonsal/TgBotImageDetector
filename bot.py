@@ -35,10 +35,7 @@ def load_img(message):
         ph_have_downloaded.append(src)
         
         bot.send_message(message.chat.id, text)
-        # if ph_have_downloaded == ph_should_be_download:
-            # bot.send_message(message.chat.id, 'All Photos have loaded')
-            # ph_should_be_download = []
-            # ph_have_downloaded = []
+       
     download_images(message)        
     def check_exs_imgs(message):
         global b
@@ -75,11 +72,7 @@ def load_vid(message):
         vid_have_downloaded.append(src)
         
         bot.send_message(message.chat.id, text)
-        # if vid_have_downloaded == vid_should_be_download:
-            # bot.send_message(message.chat.id, 'All Videos have loaded')
-            # vid_should_be_download = []
-            # vid_have_downloaded = []
-            # c = 1
+        
     download_videos(message)
     def check_exs_vids(message):
         global c
@@ -102,85 +95,54 @@ def NeurN(message):
     user_id = str(message.from_user.id)
     path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/'
     #NN(**{'source':path, 'project':path})
-    def sending_back(message):
+    def sending_back(chat):
         
         arti = os.listdir(path) # list of directory
         medias = [] # help list
         photos = [] # list for photo
         videos = [] # list for videos
-        
-        tens = len(arti) // 10 # количество десятков
-        print('tens', tens)
-      
-
-        def suka(medias, photos, tens):
+        def suka(medias, photos):
             
             photos = photos
             photos_copy = photos.copy()
-            for i in range(tens):
-                for i in photos:
-                    print('first')
-                    print('len of medias: ',len(medias))
-                    if len(medias) == 10:
-                        bot.send_media_group(chat, medias)
+            
+            for i in photos:
+                print('first')
+                print('len of medias: ',len(medias))
+                if len(medias) == 10:
+                    print('sosat')
+                    bot.send_media_group(chat, medias)
                         
-                        medias = []
-                        if len(arti_copy) < 10:
-                            break
-                    medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
-                    print('len of photos: ',len(arti_copy))
-                    arti_copy.remove(i)
+                    medias = []
+                    if len(photos_copy) < 10:
+                        
+                        break
+                medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
+                print('len of photos: ',len(photos_copy))
+                photos_copy.remove(i)
                     
             
             for i in photos_copy:
                 print('second')
-                print('len of photos: ', len(arti_copy))
+                print('len of photos: ', len(photos_copy))
                 with open(f'{path}{i}', 'rb') as photo:
                     bot.send_photo(chat,photo)
                     medias = []
         
         def blyat(videos):
             for i in videos:
-                with open('{}{}'.format(path, i), 'rb') as video:
+                with open(f'{path}{i}', 'rb') as video:
                     print(i)
                     bot.send_video(chat,video) 
-        suka(medias, arti, tens)
         for i in arti:
-            print("ebat")
+            
             format = Path(f'{path}{i}').suffix
             if format == '.png' or '.jpg' or '.jpeg':
-            
                 photos.append(i)
-                
-                # medias.append(telebot.types.InputMediaPhoto(open(f'{path}{file_name}', 'rb')))   
-                # print(len(medias), medias)
-                # if medias == 10:
-                # bot.send_media_group(chat, medias)
-                # sended.append(open('{}{}'.format(path, i), 'rb'))
-                # medias = []
-                # print(medias)
-                # elif len(sended) - len(medias) > 10 :
-                    # photo = open('{}{}'.format(path, i), 'rb')
-                    # print(i)
-                    # bot.send_photo(chat,photo)
-                    # photo.close()
-                    # medias = []
-                # elif len(arti) < 10:
-                    # photo = open('{}{}'.format(path, i), 'rb')
-                    # print(i)
-                    # bot.send_photo(chat,photo)
-                    # photo.close()
-                    # medias = []
             elif format == '.mp4':
-                
                 videos.append(i)
-                
-                # video = open('{}{}'.format(path, i), 'rb')
-                # print(i)
-                # bot.send_video(chat,video)
-                # video.close()
-                # medias = []
-        suka(medias, photos, tens)
+        suka(medias, photos, chat)
+        blyat(videos, chat)
         bot.send_message(chat, 'All processed files have sended. \n Deleting them from my storage...')
         time.sleep(3)
         def deleting(arti):
@@ -196,7 +158,7 @@ def NeurN(message):
             
         #deleting(arti)
         bot.send_message(chat, 'All processed files have deleted. \n ')
-    sending_back(message)
+    sending_back(chat)
 
 def process_creater(file, func, message):
     
