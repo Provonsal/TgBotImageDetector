@@ -10,10 +10,6 @@ bot = telebot.TeleBot('6086665182:AAHhUQiu6Crx_RaDUkSML3Ws9sZDCzaeDsg')
 a = 1
 b = 0
 c = 0
-ph_should_be_download = []
-ph_have_downloaded = []
-vid_should_be_download = []
-vid_have_downloaded = []
 
 def load_img(message):
     def download_images(message):
@@ -37,20 +33,7 @@ def load_img(message):
         bot.send_message(message.chat.id, text)
        
     download_images(message)        
-    def check_exs_imgs(message):
-        global b
-        user_id = str(message.from_user.id)
-        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp/' 
-        arti = os.listdir(path)
-        count = 0
-        format = Path('{}{}'.format(path, i)).suffix
-        for i in arti:
-            if format == '.png' or format == '.jpg' or format == '.jpeg':
-                count = count + 1
-        if count > 0:
-            None
-        elif count == 0:
-            None
+    
 
 def load_vid(message):
     
@@ -73,20 +56,6 @@ def load_vid(message):
         bot.send_message(message.chat.id, text)
         
     download_videos(message)
-    def check_exs_vids(message):
-        global c
-        user_id = str(message.from_user.id)
-        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp/' 
-        arti = os.listdir(path)
-        count = 0
-        format = Path('{}{}'.format(path, i)).suffix
-        for i in arti:
-            if format == '.mp4':
-                count = count + 1
-        if count > 0:
-            download_videos(message)
-        elif count == 0:
-            c = 1
         
 def NeurN(message): 
     from detect import run as NN
@@ -149,30 +118,9 @@ def NeurN(message):
                 print('dva')
                 videos.append(i)
         suka(medias, photos, chat)
-        #process_creater(3, suka, message, {'medias':medias, 'photos':photos, 'chat':chat, 'path':path})
-        #process_creater(3, blyat, message, {'videos':videos, 'chat':chat, 'path':path})
-        print('func video')
         blyat(videos, chat)
-        def deleting():
-            path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}'
-            
-            
-            #if i != 'exp' and os.path.isfile(path + i):
-                    
-            #    os.remove(path+i)
-                    
-            
-                
-            shutil.rmtree(path)
-            
-        #bot.send_message(chat, 'All processed files have sended. \n Deleting them from my storage...')
-        #time.sleep(10)
-        #deleting()
-    sending_back(chat)
-    
-    
         
-    #bot.send_message(chat, 'All processed files have deleted. \n ')
+    sending_back(chat)
 
 def process_creater(file, func, message, kwargs={}):
     
@@ -194,12 +142,10 @@ def main1(message):
         markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, row_width = 1)
         button_1 = telebot.types.KeyboardButton('Load files')
         
-        text = """1 Hello, stranger. 
-If you want me to recognize images on your screenshot\video, then send me it and i'll send you back processed images\video.
+        text = """Hello, stranger. 
+If you want me to recognize images on your screenshot\video, then press the button "Load files" and follow the instructions.
         
-Send me the images or videos(50mb max size due Telegram restrictions) and i'll load them.
-
-After you send me your files, wait a while (about 5-6 seconds for 10 images and 10-20 seconds for videos)
+After you send me your files, wait a while to let my pc download files
 
 
     """
