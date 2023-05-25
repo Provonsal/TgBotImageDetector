@@ -8,45 +8,45 @@ import time
 from pathlib import Path
 import shutil
 import threading
-import sqlite3
+import sql
 
 bot = telebot.TeleBot('6086665182:AAHhUQiu6Crx_RaDUkSML3Ws9sZDCzaeDsg')
 
 b = 0
 
 
-def load_img(message, s, d):
-    
+def load_img(message, s):
+    s = s
     user_id = str(message.from_user.id)
-    
     file_info = bot.get_file(message.photo[-1].file_id)
-    f = {}
-    f[user_id] = file_info.file_path
+    file_path = file_info.file_path
     
-    print(d.put(f))
+    sql.addData(user_id, file_path)
     
     def download_images(message):
-        file_info = bot.get_file(message.photo[-1].file_id)
-        print(file_info)
-        downloaded_file = bot.download_file(file_info.file_path)
-        print(file_info.file_path)
-        user_id = str(message.from_user.id) + '/' 
-        if not os.path.isdir('bot-images/' + user_id):
-            os.mkdir('bot-images/' + user_id) 
-        file_name = file_info.file_path.replace('photos/', '')
+        user_id = str(message.from_user.id)
+        lis = sql.select(user_id)
+        print(lis)
+        for i in lis:
+            downloaded_file = bot.download_file(i)
         
-        src = 'bot-images/'+ user_id + file_name
+            user_id = str(message.from_user.id) + '/' 
+            if not os.path.isdir('bot-images/' + user_id):
+                os.mkdir('bot-images/' + user_id) 
+            file_name = i.replace('photos/', '')
         
-        print(src)
-        with open(src, 'wb') as new_file:
-            new_file.write(downloaded_file)
+            src = 'bot-images/'+ user_id + file_name
         
-        text = f'{file_name} have loaded'
+            print(src)
+            with open(src, 'wb') as new_file:
+                new_file.write(downloaded_file)
+        
+            text = f'{file_name} have loaded'
         
         
         bot.send_message(message.chat.id, text)
-    if s:   
-        download_images(message)        
+       
+    download_images(message)        
     
 
 def load_vid(message):
@@ -151,33 +151,19 @@ def NeurN(message):
 
 def process_creater(file, func, message, kwargs={}):
     
-    if __name__ == '__main__':
-        queue = multiprocessing.Queue()
-        proc_l = []
-        #d = manager.dict()
+    
 
     if file == True:
         print('создаю процесс 1')
         s = 0
-        proc1 = multiprocessing.Process(target = func, args=(message, s, queue,))
-        proc_l.append(proc1)
+        proc1 = multiprocessing.Process(target = func, args=(message, s,))
+        
         proc1.start()   
     elif file == False:
         print('создаю процесс 2')
         proc2 = multiprocessing.Process(target = func, args=(message,))
         proc2.start()
-    if __name__ == '__main__':
-        for i in proc_l:
-            print(i)
-            i.join()
-        
-        d = {}
-        
-        for elem in iter(queue.get, None):
-            
-            d.update(elem)
-            print(elem)
-        print(d)
+    
 
 @bot.message_handler(commands=['start']) # 111111111111111111111111111111111111
 def main1(message):
@@ -212,11 +198,15 @@ def bum_main(call):
         global b
         chat = message.chat.id
         user_id = str(message.from_user.id)
+        print(user_id)
         path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}'
         def deleting():
+            sql.deleteData(user_id)
             bot.send_message(chat, 'Deleting previous files from my storage...')
+            print(user_id)
             
             try:
+                print('deleting')
                 shutil.rmtree(path)
             except:
                 return
@@ -224,8 +214,8 @@ def bum_main(call):
             bot.send_message(chat, 'Deleting complete.')
             
         
-        if os.path.exists(path):
-            deleting()
+        #if os.path.exists(path):
+        deleting()
 
         markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
         button_1 = telebot.types.InlineKeyboardButton(text='End loading', callback_data='End loading')
@@ -281,20 +271,6 @@ f = {}
 @bot.message_handler(content_types=['photo', 'video'])   # 44444444444444444444444444444444444444444 
 def checker(message):
     global b, f
-    user_id = str(message.from_user.id)
-    b = 0
-    
-    def unnamed(message):
-        global f
-        
-    
-        file_info = bot.get_file(message.photo[-1].file_id)
-        print(f, '1')
-        f[user_id] = file_info.file_path
-        print(f, '2')
-    
-    threading.Thread(target = unnamed, args = (message,), daemon = True).start()
-    print(f, '3')
     
     
     
@@ -312,10 +288,6 @@ def checker(message):
     
     
     
-    #file_info = bot.get_file(message.photo[-1].file_id)
-    #list_of_img.update({user_id: file_info.file_path})
-    #list_of_img[user_id] = file_info.file_path
-    #print(list_of_img)
     def loader(message):        
         content = message.content_type
         if content == 'photo':
