@@ -7,17 +7,29 @@ import os
 import time
 from pathlib import Path
 import shutil
+import threading
+import sqlite3
 
 bot = telebot.TeleBot('6086665182:AAHhUQiu6Crx_RaDUkSML3Ws9sZDCzaeDsg')
 
 b = 0
 
 
-def load_img(message):
+def load_img(message, s, d):
+    
+    user_id = str(message.from_user.id)
+    
+    file_info = bot.get_file(message.photo[-1].file_id)
+    f = {}
+    f[user_id] = file_info.file_path
+    
+    print(d.put(f))
+    
     def download_images(message):
         file_info = bot.get_file(message.photo[-1].file_id)
-        
+        print(file_info)
         downloaded_file = bot.download_file(file_info.file_path)
+        print(file_info.file_path)
         user_id = str(message.from_user.id) + '/' 
         if not os.path.isdir('bot-images/' + user_id):
             os.mkdir('bot-images/' + user_id) 
@@ -33,8 +45,8 @@ def load_img(message):
         
         
         bot.send_message(message.chat.id, text)
-       
-    download_images(message)        
+    if s:   
+        download_images(message)        
     
 
 def load_vid(message):
@@ -128,21 +140,44 @@ def NeurN(message):
                 videos.append(i)
         suka(medias, photos, chat)
         blyat(videos, chat)
-        bot.send_message(chat, 'All processed files have sent. Now you can press "Load files again" and try again')
+        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
+        button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
+        
+        
+        markup.add(button_1)
+        bot.send_message(chat, 'All processed files have sent. Now you can press "Load files again" and try again', reply_markup = markup)
         
     sending_back(chat)
 
 def process_creater(file, func, message, kwargs={}):
     
+    if __name__ == '__main__':
+        queue = multiprocessing.Queue()
+        proc_l = []
+        #d = manager.dict()
+
     if file == True:
         print('создаю процесс 1')
-        proc1 = multiprocessing.Process(target = func, args=(message,))
-        proc1.start()
-        
-    if file == False:
+        s = 0
+        proc1 = multiprocessing.Process(target = func, args=(message, s, queue,))
+        proc_l.append(proc1)
+        proc1.start()   
+    elif file == False:
         print('создаю процесс 2')
         proc2 = multiprocessing.Process(target = func, args=(message,))
         proc2.start()
+    if __name__ == '__main__':
+        for i in proc_l:
+            print(i)
+            i.join()
+        
+        d = {}
+        
+        for elem in iter(queue.get, None):
+            
+            d.update(elem)
+            print(elem)
+        print(d)
 
 @bot.message_handler(commands=['start']) # 111111111111111111111111111111111111
 def main1(message):
@@ -166,6 +201,11 @@ Please do not break the sequence of actions.
     
 @bot.callback_query_handler(func=lambda call: True) # 22222222222222222222222222222222222
 def bum_main(call):
+    
+    
+
+    
+    
     
     def start_loading(message):
         
@@ -228,7 +268,7 @@ Results will be automaticaly send here.
         
         markup.add(button_1)
         
-        bot.send_message(message.chat.id, text, reply_markup = markup)
+        bot.send_message(message.chat.id, text)
     
     dict_1 = {'Load files':start_loading,
               'End loading':end_loading,
@@ -237,9 +277,45 @@ Results will be automaticaly send here.
     if call.data in dict_1:
         dict_1[call.data](call.message)            
 
+f = {}
 @bot.message_handler(content_types=['photo', 'video'])   # 44444444444444444444444444444444444444444 
 def checker(message):
-    global b
+    global b, f
+    user_id = str(message.from_user.id)
+    b = 0
+    
+    def unnamed(message):
+        global f
+        
+    
+        file_info = bot.get_file(message.photo[-1].file_id)
+        print(f, '1')
+        f[user_id] = file_info.file_path
+        print(f, '2')
+    
+    threading.Thread(target = unnamed, args = (message,), daemon = True).start()
+    print(f, '3')
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    #file_info = bot.get_file(message.photo[-1].file_id)
+    #list_of_img.update({user_id: file_info.file_path})
+    #list_of_img[user_id] = file_info.file_path
+    #print(list_of_img)
     def loader(message):        
         content = message.content_type
         if content == 'photo':
@@ -254,11 +330,13 @@ def checker(message):
         
         
     if b:
+        print('1')
         loader(message)  
     
 
     
 if __name__ == '__main__':
-    
-    
+    manager = multiprocessing.Manager()
+    d = manager.dict()
+
     bot.polling()
