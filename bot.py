@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import telebot
 import multiprocessing
 #from detect import run as NN
@@ -42,8 +44,8 @@ def load_vid(message):
     user_id = str(message.from_user.id) + '/'
     if not os.path.isdir('bot-images/' + user_id):
         os.mkdir('bot-images/' + user_id) 
-    file_name = message.video.file_id + '.mp4'
-    print(message, type(user_id), type(file_name))
+    file_name = message.video.file_id + '.mp4' if message.video.file_name == None else message.video.file_name
+    
     src = 'bot-images/'+ user_id + file_name
         
         
@@ -75,28 +77,36 @@ def NeurN(message):
             for i in photos:
                 print('first')
                 print('len of medias: ',len(medias))
+                print('len of photos: ',len(photos))
                 if len(photos) < 10:
                     
                     break
+                elif len(photos) == 10:
+                    print('sosat')
+                    for i in photos:
+                        medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
+                    bot.send_media_group(chat, medias)   
+                    medias = []
+                    break
                 elif len(medias) == 10:
                     print('sosat')
-                    bot.send_media_group(chat, medias)
-                        
+                    
+                    bot.send_media_group(chat, medias)  
                     medias = []
                     if len(photos_copy) < 10:
                         
                         break
                 medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
-                print('len of photos: ',len(photos_copy))
+                print('len of photos_copy: ',len(photos_copy))
                 photos_copy.remove(i)
                     
-            
-            for i in photos_copy:
-                print('second')
-                print('len of photos: ', len(photos_copy))
-                with open(f'{path}{i}', 'rb') as photo:
-                    bot.send_photo(chat,photo)
-                    medias = []
+            if len(photos) != 10:
+                for i in photos_copy:
+                    print('second')
+                    print('len of photos_copy: ', len(photos_copy))
+                    with open(f'{path}{i}', 'rb') as photo:
+                        bot.send_photo(chat,photo)
+                        medias = []
             
         
         def blyat(videos, chat):
@@ -124,18 +134,20 @@ def NeurN(message):
 
 def process_creater(file, func, message, kwargs={}):
     
-    if file == 1:
+    if file == True:
+        print('создаю процесс 1')
         proc1 = multiprocessing.Process(target = func, args=(message,))
         proc1.start()
-    if file == 0:
-        proc2 = multiprocessing.Process(target = func, args=(message,))
-        proc2.start()
-    else:
+        
+    if file == False:
+        print('создаю процесс 2')
         proc2 = multiprocessing.Process(target = func, args=(message,))
         proc2.start()
 
 @bot.message_handler(commands=['start']) # 111111111111111111111111111111111111
 def main1(message):
+
+
     def main2(message):
     
         global a
@@ -214,8 +226,10 @@ def checker(message):
         content = message.content_type
         if content == 'photo':
             time.sleep(1)
+            print('Создаю процесс загрузки фотографии')
             process_creater(1, load_img, message)
         elif content == 'video':
+            print('Создаю процесс загрузки видео')
             time.sleep(1)
             process_creater(0, load_vid, message)
     
