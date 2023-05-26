@@ -5,27 +5,27 @@ import random
 db = sqlite3.connect('bot.db', check_same_thread=False)
 sql = db.cursor()
 
-#sql.execute(""" CREATE TABLE IF NOT EXISTS users (user_id TEXT, user_file_name TEXT) """)
+#sql.execute(""" ALTER TABLE users ADD COLUMN 'video' 'TEXT' """)
+#sql.execute(""" ALTER TABLE users ADD COLUMN 'image' 'TEXT' """)
 #db.commit()
 
 
-def addData(user_id, user_file_name):     
-    sql.execute(f" INSERT INTO users VALUES ('{user_id}','{user_file_name}') ")
+def addData(user_id, user_file_name, video, image):     
+    sql.execute(f" INSERT INTO users VALUES ('{user_id}','{user_file_name}','{video}','{image}') ")
     db.commit()
 
-def deleteData(fl):
-    sql.execute(f" DELETE FROM users WHERE user_id = '{fl}'")
+def deleteData(us_id):
+    sql.execute(f" DELETE FROM users WHERE user_id = '{us_id}'")
     db.commit()
      
 
 def select(fl):
-    sql.execute(f" SELECT user_file_name FROM users WHERE user_id = '{fl}'")
+    sql.execute(f" SELECT user_file_name, image, video FROM users WHERE user_id = '{fl}'")
     files = sql.fetchall()
     lis = []
     for k in files:
-        lis.append(k[0])
+        lis.append(k)
     return lis
     
     
 
-select('999999')
