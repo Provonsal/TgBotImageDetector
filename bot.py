@@ -8,71 +8,94 @@ import time
 from pathlib import Path
 import shutil
 import threading
-import sqlite3
+import sql
 
 bot = telebot.TeleBot('6086665182:AAHhUQiu6Crx_RaDUkSML3Ws9sZDCzaeDsg')
 
 b = 0
 
 
-def load_img(message, s, d):
+def load_img(message):
     
     user_id = str(message.from_user.id)
-    
     file_info = bot.get_file(message.photo[-1].file_id)
-    f = {}
-    f[user_id] = file_info.file_path
+    file_path = file_info.file_path
     
-    print(d.put(f))
+    sql.addData(user_id, file_path, 0, 1)
     
-    def download_images(message):
-        file_info = bot.get_file(message.photo[-1].file_id)
-        print(file_info)
-        downloaded_file = bot.download_file(file_info.file_path)
-        print(file_info.file_path)
-        user_id = str(message.from_user.id) + '/' 
-        if not os.path.isdir('bot-images/' + user_id):
-            os.mkdir('bot-images/' + user_id) 
-        file_name = file_info.file_path.replace('photos/', '')
+            
+    
+def download_images(message, user_id):
         
-        src = 'bot-images/'+ user_id + file_name
+        lis = sql.select(user_id)
+        print(lis)
+        lis_i = []
+        user_id = str(user_id) + '/'
+        for i in lis:
+            if i[1]:
+                lis_i.append(i[0])
+        for i in lis_i:
+            print(i)
+            downloaded_file = bot.download_file(i)
         
-        print(src)
-        with open(src, 'wb') as new_file:
-            new_file.write(downloaded_file)
+            
+            print(user_id)
+            if not os.path.isdir('bot-images/' + user_id):
+                os.mkdir('bot-images/' + user_id) 
+            file_name = i.replace('photos/', '')
         
-        text = f'{file_name} have loaded'
+            src = 'bot-images/'+ user_id + file_name
         
+            
+            with open(src, 'wb') as new_file:
+                new_file.write(downloaded_file)
         
+            
+        
+        text = f'{len(lis_i)} images have loaded'
         bot.send_message(message.chat.id, text)
-    if s:   
-        download_images(message)        
-    
 
 def load_vid(message):
     
+    user_id = str(message.from_user.id)
     file_info = bot.get_file(message.video.file_id)
-    downloaded_file = bot.download_file(file_info.file_path)
-    user_id = str(message.from_user.id) + '/'
-    if not os.path.isdir('bot-images/' + user_id):
-        os.mkdir('bot-images/' + user_id) 
-    file_name = message.video.file_id + '.mp4' if message.video.file_name == None else message.video.file_name
+    file_path = file_info.file_path
     
-    src = 'bot-images/'+ user_id + file_name
+    sql.addData(user_id, file_path, 1, 0)
+
+def download_videos(message, user_id):
+    print('хуууууй') 
+    lis = sql.select(user_id)
+    print(lis)
+    lis_v = []
+    for i in lis:
+        if i[2]:
+            
+            lis_v.append(i[0])
+    print(lis_v)
+    for i in lis_v:
+        
+        downloaded_file = bot.download_file(i)
+        user_id = user_id + '/'
+        if not os.path.isdir('bot-images/' + user_id):
+            os.mkdir('bot-images/' + user_id) 
+        file_name = i.replace('videos/', '') #message.video.file_id + '.mp4' if message.video == None else message.video.file_name
+    
+        src = 'bot-images/'+ user_id + file_name
         
         
-    with open(src, 'wb') as new_file:
-        new_file.write(downloaded_file)
+        with open(src, 'wb') as new_file:
+            new_file.write(downloaded_file)
         
-    text = f'{file_name} have loaded'
+    text = f'{len(lis_v)} videos have loaded'
     bot.send_message(message.chat.id, text)
         
     
         
-def NeurN(message): 
+def NeurN(message, user_id): 
     from detect import run as NN
     chat = message.chat.id
-    user_id = str(message.from_user.id)
+    #user_id = str(message.from_user.id)
     path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/'
     NN(**{'source':path, 'project':path})
     def sending_back(chat):
@@ -149,118 +172,56 @@ def NeurN(message):
         
     sending_back(chat)
 
-def process_creater(file, func, message, kwargs={}):
+def process_creater(file, func, args):
     
-    if __name__ == '__main__':
-        queue = multiprocessing.Queue()
-        proc_l = []
-        #d = manager.dict()
+    
 
     if file == True:
         print('создаю процесс 1')
-        s = 0
-        proc1 = multiprocessing.Process(target = func, args=(message, s, queue,))
-        proc_l.append(proc1)
+        
+        proc1 = multiprocessing.Process(target = func, args=args)
+        
         proc1.start()   
     elif file == False:
         print('создаю процесс 2')
-        proc2 = multiprocessing.Process(target = func, args=(message,))
+        proc2 = multiprocessing.Process(target = func, args=args)
         proc2.start()
-    if __name__ == '__main__':
-        for i in proc_l:
-            print(i)
-            i.join()
-        
-        d = {}
-        
-        for elem in iter(queue.get, None):
-            
-            d.update(elem)
-            print(elem)
-        print(d)
+    
+
+
+def loader(message):        
+        content = message.content_type
+        if content == 'photo':
+            time.sleep(1)
+            print('Создаю процесс добавления фото в бд') 
+            process_creater(1, load_img, (message,))
+        elif content == 'video':
+            print('Создаю процесс добавления видео в бд')
+            time.sleep(1)
+            process_creater(0, load_vid, (message,))
 
 @bot.message_handler(commands=['start']) # 111111111111111111111111111111111111
 def main1(message):
     global a
     markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-    button_1 = telebot.types.InlineKeyboardButton(text='Load files', callback_data='Load files')
+    button_1 = telebot.types.InlineKeyboardButton(text='Next step: file loading', callback_data='Load files')
         
     text = """Hello, stranger. 
 
-If you want me to recognize images on your screenshot\video, then press the button "Load files" and follow the instructions.
+I'm a bot, my name is 1pd8 and I can recognize images on your screenshot(s) or video(s).
         
-After you send me your files, wait a while to let my pc download files
-
-Please do not break the sequence of actions.
+Please press the button below ⬇ to continue. 
 """
     markup.add(button_1)
     bot.send_message(message.chat.id, text, reply_markup = markup)
-    
-    
-        
-    
-@bot.callback_query_handler(func=lambda call: True) # 22222222222222222222222222222222222
-def bum_main(call):
-    
-    
-
-    
-    
-    
-    def start_loading(message):
-        
-        global b
-        chat = message.chat.id
-        user_id = str(message.from_user.id)
-        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}'
-        def deleting():
-            bot.send_message(chat, 'Deleting previous files from my storage...')
-            
-            try:
-                shutil.rmtree(path)
-            except:
-                return
-            time.sleep(5)
-            bot.send_message(chat, 'Deleting complete.')
-            
-        
-        if os.path.exists(path):
-            deleting()
-
-        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-        button_1 = telebot.types.InlineKeyboardButton(text='End loading', callback_data='End loading')
-        
-        text = """Okay, send me your files to load. I'll load them"""
-        
-        markup.add(button_1)
-        
-        bot.send_message(message.chat.id, text, reply_markup = markup)
-        b = 1
-    
-    
-    def end_loading(message):
-        global b
-        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-        button_1 = telebot.types.InlineKeyboardButton(text='Process the files', callback_data='Process the files')
-        
-        text = """Okay, loading is done, now press the button "Process the files" and magic begin """
-        
-        markup.add(button_1)
-        
-        bot.send_message(message.chat.id, text, reply_markup = markup)
-        
-        b = 0
-    
-       
-    
-    def processing(message):
+def processing(message, real_user_id):
         global a
         text = """Well let's start.
-It will take a while, please wait.
+This process will take a while, please wait.
 Results will be automaticaly send here.
 """
         
-        process_creater(0, NeurN, message)
+        
         
         markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
         button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
@@ -268,67 +229,113 @@ Results will be automaticaly send here.
         
         markup.add(button_1)
         
-        bot.send_message(message.chat.id, text)
+        bot.send_message(message.chat.id, text)  
+        NeurN(message, real_user_id)
+
+
+
+def end_loading(message, real_user_id):
+        global b
+        
+        markup1 = telebot.types.ReplyKeyboardRemove()
+        markup2 = telebot.types.InlineKeyboardMarkup(row_width = 1)
+        button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
+        
+        text1 = """Understood. Downloading files. """
+        text2 = """ Files are downloaded. Starting processing... """
+        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{real_user_id}'
+        markup2.add(button_1)
+        #process_creater(1, download_images, (message, ))
+        #content = message.content_type
+        bot.send_message(message.chat.id, text1, reply_markup = markup1)
+        print('Создаю процесс загрузки фотографии 1111')
+        #process_creater(1, download_images, (message,real_user_id))
+        proc1 = multiprocessing.Process(target = download_images, args=(message,real_user_id))
+        proc1.start()
+        print('Создаю процесс загрузки видео 1111')
+        proc2 = multiprocessing.Process(target = download_videos, args=(message,real_user_id))
+        proc2.start()
+        #process_creater(0, download_videos, (message,real_user_id))
+        
+        proc1.join()
+        proc2.join()
+        b = 0
+        bot.send_message(message.chat.id, text2)
+        if os.path.exists(path):
+            process_creater(0, processing, (message,real_user_id))
+        else:
+            bot.send_message(message.chat.id, 'Sorry, but there is no files to process.', reply_markup=markup2)
+        #NeurN(message, real_user_id)
+        
+        
     
-    dict_1 = {'Load files':start_loading,
-              'End loading':end_loading,
-              'Process the files':processing,
+@bot.callback_query_handler(func=lambda call: True) # 22222222222222222222222222222222222
+def bum_main(call):
+    
+    
+    real_user_id = str(call.from_user.id)
+    
+    
+    
+    def start_loading(message, real_user_id):
+        
+        global b
+        chat = message.chat.id
+        user_id = str(message.from_user.id)
+        print(user_id)
+        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{real_user_id}'
+        def deleting(real_user_id):
+            print(real_user_id)
+            sql.deleteData(real_user_id)
+            bot.send_message(chat, 'Deleting previous files from my storage...')
+            
+            
+            
+            print('deleting')
+            shutil.rmtree(path)
+            
+            time.sleep(5)
+            bot.send_message(chat, 'Deleting complete.')
+            
+        
+        if os.path.exists(path):
+            deleting(real_user_id)
+
+        markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard = True)
+        button_1 = telebot.types.KeyboardButton(text="✅ i'm done, please load these files ✅")
+        
+        text = """Okay let's start, send me your files. It can be photos or videos."""
+        
+        markup.add(button_1)
+        
+        bot.send_message(message.chat.id, text, reply_markup = markup)
+        b = 1
+    
+    
+    
+        
+        
+    
+       
+    
+    
+    
+    dict_1 = {'Load files':start_loading
               }         
     if call.data in dict_1:
-        dict_1[call.data](call.message)            
+        dict_1[call.data](call.message, real_user_id)            
 
-f = {}
+@bot.message_handler(func= lambda message: message.text == "✅ i'm done, please load these files ✅")
+def jopa(message):
+    user_id = str(message.from_user.id)
+    #end_loading(message, user_id)
+    process_creater(1, end_loading, (message, user_id) ) 
+
 @bot.message_handler(content_types=['photo', 'video'])   # 44444444444444444444444444444444444444444 
 def checker(message):
-    global b, f
-    user_id = str(message.from_user.id)
-    b = 0
-    
-    def unnamed(message):
-        global f
-        
-    
-        file_info = bot.get_file(message.photo[-1].file_id)
-        print(f, '1')
-        f[user_id] = file_info.file_path
-        print(f, '2')
-    
-    threading.Thread(target = unnamed, args = (message,), daemon = True).start()
-    print(f, '3')
+    global b
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    #file_info = bot.get_file(message.photo[-1].file_id)
-    #list_of_img.update({user_id: file_info.file_path})
-    #list_of_img[user_id] = file_info.file_path
-    #print(list_of_img)
-    def loader(message):        
-        content = message.content_type
-        if content == 'photo':
-            time.sleep(1)
-            print('Создаю процесс загрузки фотографии')
-            process_creater(1, load_img, message)
-        elif content == 'video':
-            print('Создаю процесс загрузки видео')
-            time.sleep(1)
-            process_creater(0, load_vid, message)
-    
-        
-        
     if b:
         print('1')
         loader(message)  
@@ -336,7 +343,6 @@ def checker(message):
 
     
 if __name__ == '__main__':
-    manager = multiprocessing.Manager()
-    d = manager.dict()
+    
 
     bot.polling()
