@@ -204,18 +204,69 @@ def loader(message):
 def main1(message):
     global a
     markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-    button_1 = telebot.types.InlineKeyboardButton(text='Next step', callback_data='Load files')
+    button_1 = telebot.types.InlineKeyboardButton(text='Next step: file loading', callback_data='Load files')
         
     text = """Hello, stranger. 
 
-I'm a bot, my name is 1pd8 and I can recognize images on your screenshot(s)\video(s).
+I'm a bot, my name is 1pd8 and I can recognize images on your screenshot(s) or video(s).
         
 Please press the button below ⬇ to continue. 
 """
     markup.add(button_1)
     bot.send_message(message.chat.id, text, reply_markup = markup)
-    
-    
+def processing(message, real_user_id):
+        global a
+        text = """Well let's start.
+This process will take a while, please wait.
+Results will be automaticaly send here.
+"""
+        
+        
+        
+        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
+        button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
+        
+        
+        markup.add(button_1)
+        
+        bot.send_message(message.chat.id, text)  
+        NeurN(message, real_user_id)
+
+
+
+def end_loading(message, real_user_id):
+        global b
+        
+        markup1 = telebot.types.ReplyKeyboardRemove()
+        markup2 = telebot.types.InlineKeyboardMarkup(row_width = 1)
+        button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
+        
+        text1 = """Understood. Downloading files. """
+        text2 = """ Files are downloaded. Starting processing... """
+        path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{real_user_id}'
+        markup2.add(button_1)
+        #process_creater(1, download_images, (message, ))
+        #content = message.content_type
+        bot.send_message(message.chat.id, text1, reply_markup = markup1)
+        print('Создаю процесс загрузки фотографии 1111')
+        #process_creater(1, download_images, (message,real_user_id))
+        proc1 = multiprocessing.Process(target = download_images, args=(message,real_user_id))
+        proc1.start()
+        print('Создаю процесс загрузки видео 1111')
+        proc2 = multiprocessing.Process(target = download_videos, args=(message,real_user_id))
+        proc2.start()
+        #process_creater(0, download_videos, (message,real_user_id))
+        
+        proc1.join()
+        proc2.join()
+        b = 0
+        bot.send_message(message.chat.id, text2)
+        if os.path.exists(path):
+            process_creater(0, processing, (message,real_user_id))
+        else:
+            bot.send_message(message.chat.id, 'Sorry, but there is no files to process.', reply_markup=markup2)
+        #NeurN(message, real_user_id)
+        
         
     
 @bot.callback_query_handler(func=lambda call: True) # 22222222222222222222222222222222222
@@ -250,10 +301,10 @@ def bum_main(call):
         if os.path.exists(path):
             deleting(real_user_id)
 
-        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-        button_1 = telebot.types.InlineKeyboardButton(text='End loading', callback_data='End loading')
+        markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard = True)
+        button_1 = telebot.types.KeyboardButton(text="✅ i'm done, please load these files ✅")
         
-        text = """Okay, send me your files to load. I'll load them"""
+        text = """Okay let's start, send me your files. It can be photos or videos."""
         
         markup.add(button_1)
         
@@ -261,59 +312,27 @@ def bum_main(call):
         b = 1
     
     
-    def end_loading(message, real_user_id):
-        global b
-        
-        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-        button_1 = telebot.types.InlineKeyboardButton(text='Process the files', callback_data='Process the files')
-        
-        text = """Okay, loading is done, now press the button "Process the files" and magic begin """
-        
-        markup.add(button_1)
-        #process_creater(1, download_images, (message, ))
-        #content = message.content_type
-        
-        print('Создаю процесс загрузки фотографии 1111')
-        process_creater(1, download_images, (message,real_user_id))
-        
-        print('Создаю процесс загрузки видео 1111')
-        time.sleep(1)
-        process_creater(0, download_videos, (message,real_user_id))
-        
-        bot.send_message(message.chat.id, text, reply_markup = markup)
-        b = 0
+    
         
         
     
        
     
-    def processing(message, real_user_id):
-        global a
-        text = """Well let's start.
-It will take a while, please wait.
-Results will be automaticaly send here.
-"""
-        
-        process_creater(0, NeurN, (message, real_user_id))
-        
-        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-        button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
-        
-        
-        markup.add(button_1)
-        
-        bot.send_message(message.chat.id, text)
     
-    dict_1 = {'Load files':start_loading,
-              'End loading':end_loading,
-              'Process the files':processing,
+    
+    dict_1 = {'Load files':start_loading
               }         
     if call.data in dict_1:
         dict_1[call.data](call.message, real_user_id)            
 
-f = {}
+@bot.message_handler(func= lambda message: message.text == "✅ i'm done, please load these files ✅")
+def jopa(message):
+    user_id = str(message.from_user.id)
+    #end_loading(message, user_id)
+    process_creater(1, end_loading, (message, user_id) ) 
+
 @bot.message_handler(content_types=['photo', 'video'])   # 44444444444444444444444444444444444444444 
-def checker(message, s=0):
+def checker(message):
     global b
     
     
@@ -324,7 +343,6 @@ def checker(message, s=0):
 
     
 if __name__ == '__main__':
-    manager = multiprocessing.Manager()
-    d = manager.dict()
+    
 
     bot.polling()
