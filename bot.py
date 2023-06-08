@@ -159,10 +159,14 @@ def NeurN(message, user_id):
                     
                     bot.send_media_group(chat, medias)  
                     medias = []
+                    # если кол-во оставшихся фото меньше 10 то цикл полность прерывается и начинается другой
+                    # в котором происходит отправка фото по одной штуки
                     if len(photos_copy) < 10:
                         
                         break
-
+                
+                # если ни одно условие не сработало, то фото добавляется в вспомогательный список и итерируется дальше
+                # пока не сработает одно из условий
                 medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
                 print('len of photos_copy: ',len(photos_copy))
                 photos_copy.remove(i)
