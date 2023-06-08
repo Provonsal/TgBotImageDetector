@@ -31,11 +31,13 @@ def download_images(message, user_id):
         lis_i = []
         user_id = str(user_id) + '/'
 
+        # итерация первого списка созданного из записей БД и добавление их во второй список если image = 1
         for i in lis:
             
             if i[1]:
                 lis_i.append(i[0])
-
+        
+        # итерация второго списка и загрузка каждого элемента с серверов телеграм
         for i in lis_i:
             
             downloaded_file = bot.download_file(i)
@@ -95,8 +97,7 @@ def download_videos(message, user_id):
     
 # функция обработки файлов нейронной сетью и дальнейшее отправление переработанных данных обратно пользователю
 def NeurN(message, user_id): 
-
-    # импорт файла с функцией нейросети
+    
     from detect import run as NN 
 
     # id чата с пользователем
@@ -111,11 +112,16 @@ def NeurN(message, user_id):
     # функция отправки файлов обратно пользователю
     def sending_back(chat):
 
+        # путь откуда брать обработанные файлы
         path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp/'
-        arti = os.listdir(path) # list of directory
-        medias = [] # help list
-        photos = [] # list for photo
-        videos = [] # list for videos
+        
+        # list of directory
+        arti = os.listdir(path) 
+
+        # вспомогательные листы
+        medias = [] 
+        photos = [] 
+        videos = [] 
         
         # функция отправки обработанных фото обратно пользователю
         def otpravka_photo(medias, photos, chat):
