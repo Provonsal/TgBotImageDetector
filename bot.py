@@ -26,10 +26,11 @@ def load_img(message):
 # функция скачивания изображений для конкретного пользователя по списку взятого из БД    
 def download_images(message, user_id):
         
+        # достаем список файлов принадлежат конкретному пользователю
         lis = sql.select(user_id)
         print(lis)
         lis_i = []
-        user_id = str(user_id) + '/'
+        user_id = str(user_id) + '/' 
 
         # итерация первого списка созданного из записей БД и добавление их во второй список если image = 1
         for i in lis:
@@ -65,19 +66,19 @@ def load_vid(message):
 
 # функция скачивания видеофайлов для конкретного пользователя по списку взятого из БД
 def download_videos(message, user_id):
-     
+    
+    # достаем список файлов принадлежат конкретному пользователю
     lis = sql.select(user_id)
     print(lis)
     lis_v = []
 
+    # итерация первого списка созданного из записей БД и добавление их во второй список если video = 1
     for i in lis:
 
         if i[2]:
             
             lis_v.append(i[0])
-
-    print(lis_v)
-
+    
     for i in lis_v:
         
         downloaded_file = bot.download_file(i)
