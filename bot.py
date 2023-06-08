@@ -79,6 +79,7 @@ def download_videos(message, user_id):
             
             lis_v.append(i[0])
     
+    # итерация второго списка и загрузка каждого элемента с серверов телеграм
     for i in lis_v:
         
         downloaded_file = bot.download_file(i)
@@ -136,9 +137,12 @@ def NeurN(message, user_id):
                 print('len of medias: ',len(medias))
                 print('len of photos: ',len(photos))
 
+                # если количество фото меньше 10, то цикл прерывает и начинается другой где фото отправляються по отдельности
                 if len(photos) < 10:
                     break
 
+                # если количество фото равно десяти, то все фото добавляются в список и 
+                # отправляются единой пачкой 10 шт
                 elif len(photos) == 10:
                     
                     for i in photos:
