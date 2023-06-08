@@ -95,12 +95,20 @@ def download_videos(message, user_id):
     
 # функция обработки файлов нейронной сетью и дальнейшее отправление переработанных данных обратно пользователю
 def NeurN(message, user_id): 
-    
-    from detect import run as NN
-    chat = message.chat.id
-    path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/'
-    NN(**{'source':path, 'project':path})
 
+    # импорт файла с функцией нейросети
+    from detect import run as NN 
+
+    # id чата с пользователем
+    chat = message.chat.id
+    
+    # путь для каждого пользователя
+    path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/' 
+    
+    # функция запуска нейросеть на детекцию и передачи ей аргументов
+    NN(**{'source':path, 'project':path}) 
+
+    # функция отправки файлов обратно пользователю
     def sending_back(chat):
 
         path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp/'
@@ -306,11 +314,12 @@ def end_loading(message, real_user_id):
         bot.send_message(message.chat.id, 'Sorry, but there is no files to process.', reply_markup=markup2)
         
 # декоратор отслеживающий коллбеки от инлайн кнопок
+# и запускающий функцию bum_main в случае обнаружения коллбека
 @bot.callback_query_handler(func=lambda call: True) 
 def bum_main(call):
     
     real_user_id = str(call.from_user.id)
-    
+    # функция начала записи имен файлов в БД для каждого конкретного пользователя
     def start_loading(message, real_user_id):
         
         global b
@@ -318,20 +327,21 @@ def bum_main(call):
         chat = message.chat.id
 
         path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{real_user_id}'
+
+        # функция очистки директори каждого юзера при попытке повторной загрузки 
+        # чтобы исключить захламление диска
         def deleting(real_user_id):
-            print(real_user_id)
+
             sql.deleteData(real_user_id)
+            
             bot.send_message(chat, 'Deleting previous files from my storage...')
             
-            
-            
-            print('deleting')
+            print(real_user_id, 'deleting')
             shutil.rmtree(path)
             
             time.sleep(5)
             bot.send_message(chat, 'Deleting complete.')
             
-        
         if os.path.exists(path):
             deleting(real_user_id)
 
@@ -351,12 +361,14 @@ def bum_main(call):
     if call.data in dict_1:
         dict_1[call.data](call.message, real_user_id)            
 
+# декоратор, который отслеживает то когда пользователь говорит что отправил все файлы, которые хотел
 @bot.message_handler(func= lambda message: message.text == "✅ i'm done, please load these files ✅")
 def jopa(message):
     
     user_id = str(message.from_user.id)
     process_creater(1, end_loading, (message, user_id) ) 
 
+# декоратор отслеживающий фото и видео
 @bot.message_handler(content_types=['photo', 'video'])    
 def checker(message):
     
