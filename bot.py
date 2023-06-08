@@ -159,6 +159,7 @@ def NeurN(message, user_id):
                     
                     bot.send_media_group(chat, medias)  
                     medias = []
+
                     # если кол-во оставшихся фото меньше 10 то цикл полность прерывается и начинается другой
                     # в котором происходит отправка фото по одной штуки
                     if len(photos_copy) < 10:
@@ -169,8 +170,11 @@ def NeurN(message, user_id):
                 # пока не сработает одно из условий
                 medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
                 print('len of photos_copy: ',len(photos_copy))
+                
+                # удаление отправленных фото из копии списка
                 photos_copy.remove(i)
-                    
+            
+            # если общее количество фото не равно 10, то начинается отправка по одному
             if len(photos) != 10:
 
                 for i in photos_copy:
@@ -185,6 +189,7 @@ def NeurN(message, user_id):
         # функция отправки обработанных видео обратно пользователю
         def otpravka_vid(videos, chat):
 
+            # цикл отправки видео по одному
             for i in videos:
 
                 print('second')
@@ -193,7 +198,7 @@ def NeurN(message, user_id):
                 with open(f'{path}{i}', 'rb') as video:
                     print(i)
                     bot.send_video(chat,video)
-            
+        # сортировка файлов по их типу: фото или видео; исходя из суффикса    
         for i in arti:
 
             format = Path(f'{path}{i}').suffix
@@ -208,7 +213,8 @@ def NeurN(message, user_id):
                 print('dva')
                 print(i)
                 videos.append(i)
-
+        
+        # вызов функций по отправке фото и видео
         otpravka_photo(medias, photos, chat)
         otpravka_vid(videos, chat)
         
