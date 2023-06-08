@@ -116,7 +116,8 @@ def NeurN(message, user_id):
         medias = [] # help list
         photos = [] # list for photo
         videos = [] # list for videos
-
+        
+        # функция отправки обработанных фото обратно пользователю
         def otpravka_photo(medias, photos, chat):
             
             photos = photos
@@ -165,7 +166,7 @@ def NeurN(message, user_id):
                         bot.send_photo(chat,photo)
                         medias = []
             
-        
+        # функция отправки обработанных видео обратно пользователю
         def otpravka_vid(videos, chat):
 
             for i in videos:
