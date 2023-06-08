@@ -2,15 +2,13 @@
 
 import telebot
 import multiprocessing
-#from detect import run as NN
 import os
 import time
 from pathlib import Path
 import shutil
-import threading
 import sql
 
-bot = telebot.TeleBot('6086665182:AAHhUQiu6Crx_RaDUkSML3Ws9sZDCzaeDsg')
+bot = telebot.TeleBot('token')
 
 b = 0
 
@@ -31,27 +29,25 @@ def download_images(message, user_id):
         print(lis)
         lis_i = []
         user_id = str(user_id) + '/'
+
         for i in lis:
+            
             if i[1]:
                 lis_i.append(i[0])
+
         for i in lis_i:
-            print(i)
-            downloaded_file = bot.download_file(i)
-        
             
+            downloaded_file = bot.download_file(i)
             print(user_id)
+
             if not os.path.isdir('bot-images/' + user_id):
                 os.mkdir('bot-images/' + user_id) 
             file_name = i.replace('photos/', '')
         
             src = 'bot-images/'+ user_id + file_name
-        
-            
             with open(src, 'wb') as new_file:
                 new_file.write(downloaded_file)
-        
-            
-        
+
         text = f'{len(lis_i)} images have loaded'
         bot.send_message(message.chat.id, text)
 
@@ -64,15 +60,19 @@ def load_vid(message):
     sql.addData(user_id, file_path, 1, 0)
 
 def download_videos(message, user_id):
-    print('хуууууй') 
+     
     lis = sql.select(user_id)
     print(lis)
     lis_v = []
+
     for i in lis:
+
         if i[2]:
             
             lis_v.append(i[0])
+
     print(lis_v)
+
     for i in lis_v:
         
         downloaded_file = bot.download_file(i)
@@ -83,7 +83,6 @@ def download_videos(message, user_id):
     
         src = 'bot-images/'+ user_id + file_name
         
-        
         with open(src, 'wb') as new_file:
             new_file.write(downloaded_file)
         
@@ -93,18 +92,20 @@ def download_videos(message, user_id):
     
         
 def NeurN(message, user_id): 
+    
     from detect import run as NN
     chat = message.chat.id
-    #user_id = str(message.from_user.id)
     path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/'
     NN(**{'source':path, 'project':path})
+
     def sending_back(chat):
         path = f'C:/Users/Provonsal/source/repos/yolov5/bot-images/{user_id}/exp/'
         arti = os.listdir(path) # list of directory
         medias = [] # help list
         photos = [] # list for photo
         videos = [] # list for videos
-        def suka(medias, photos, chat):
+
+        def otpravka_photo(medias, photos, chat):
             
             photos = photos
             photos_copy = photos.copy()
@@ -114,95 +115,117 @@ def NeurN(message, user_id):
                 print('len of medias: ',len(medias))
                 print('len of photos: ',len(photos))
                 if len(photos) < 10:
-                    
                     break
+
                 elif len(photos) == 10:
-                    print('sosat')
+                    
                     for i in photos:
                         medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
+                    
                     bot.send_media_group(chat, medias)   
                     medias = []
+
                     break
+
                 elif len(medias) == 10:
-                    print('sosat')
+                    
                     
                     bot.send_media_group(chat, medias)  
                     medias = []
                     if len(photos_copy) < 10:
                         
                         break
+
                 medias.append(telebot.types.InputMediaPhoto(open(f'{path}{i}', 'rb')))
                 print('len of photos_copy: ',len(photos_copy))
                 photos_copy.remove(i)
                     
             if len(photos) != 10:
+
                 for i in photos_copy:
+
                     print('second')
                     print('len of photos_copy: ', len(photos_copy))
+
                     with open(f'{path}{i}', 'rb') as photo:
                         bot.send_photo(chat,photo)
                         medias = []
             
         
-        def blyat(videos, chat):
+        def otpravka_vid(videos, chat):
+
             for i in videos:
+
                 print('second')
                 print('len of videos: ', len(videos))
+
                 with open(f'{path}{i}', 'rb') as video:
                     print(i)
                     bot.send_video(chat,video)
             
         for i in arti:
+
             format = Path(f'{path}{i}').suffix
+
             if format == '.png' or format == '.jpg' or format == '.jpeg':
+
                 print('raz')
                 photos.append(i)
+
             elif format == '.mp4':
+
                 print('dva')
                 print(i)
                 videos.append(i)
-        suka(medias, photos, chat)
-        blyat(videos, chat)
+
+        otpravka_photo(medias, photos, chat)
+        otpravka_vid(videos, chat)
+        
         markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
         button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
-        
-        
         markup.add(button_1)
+
         bot.send_message(chat, 'All processed files have sent. Now you can press "Load files again" and try again', reply_markup = markup)
         
     sending_back(chat)
 
 def process_creater(file, func, args):
     
-    
-
     if file == True:
+
         print('создаю процесс 1')
-        
         proc1 = multiprocessing.Process(target = func, args=args)
-        
-        proc1.start()   
+        proc1.start()
+
     elif file == False:
+
         print('создаю процесс 2')
         proc2 = multiprocessing.Process(target = func, args=args)
         proc2.start()
     
 
 
-def loader(message):        
-        content = message.content_type
-        if content == 'photo':
-            time.sleep(1)
-            print('Создаю процесс добавления фото в бд') 
-            process_creater(1, load_img, (message,))
-        elif content == 'video':
-            print('Создаю процесс добавления видео в бд')
-            time.sleep(1)
-            process_creater(0, load_vid, (message,))
+def loader(message):
+    
+    content = message.content_type
+
+    if content == 'photo':
+
+        time.sleep(1)
+        print('Создаю процесс добавления фото в бд') 
+        process_creater(1, load_img, (message,))
+
+    elif content == 'video':
+
+        print('Создаю процесс добавления видео в бд')
+        time.sleep(1)
+        process_creater(0, load_vid, (message,))
 
 @bot.message_handler(commands=['start']) # 111111111111111111111111111111111111
 def main1(message):
+    
     global a
+
     markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
     button_1 = telebot.types.InlineKeyboardButton(text='Next step: file loading', callback_data='Load files')
         
@@ -213,24 +236,25 @@ I'm a bot, my name is 1pd8 and I can recognize images on your screenshot(s) or v
 Please press the button below ⬇ to continue. 
 """
     markup.add(button_1)
+
     bot.send_message(message.chat.id, text, reply_markup = markup)
+
 def processing(message, real_user_id):
-        global a
-        text = """Well let's start.
+    
+    global a
+    
+    text = """Well let's start.
 This process will take a while, please wait.
 Results will be automaticaly send here.
 """
+       
+    markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
+    button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
         
+    markup.add(button_1)
         
-        
-        markup = telebot.types.InlineKeyboardMarkup(row_width = 1)
-        button_1 = telebot.types.InlineKeyboardButton(text='Load files again', callback_data='Load files')
-        
-        
-        markup.add(button_1)
-        
-        bot.send_message(message.chat.id, text)  
-        NeurN(message, real_user_id)
+    bot.send_message(message.chat.id, text)  
+    NeurN(message, real_user_id)
 
 
 

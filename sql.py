@@ -1,13 +1,10 @@
 import sqlite3
-import random
 
 
 db = sqlite3.connect('bot.db', check_same_thread=False)
 sql = db.cursor()
 
-#sql.execute(""" ALTER TABLE users ADD COLUMN 'video' 'TEXT' """)
-#sql.execute(""" ALTER TABLE users ADD COLUMN 'image' 'TEXT' """)
-#db.commit()
+
 
 
 def addData(user_id, user_file_name, video, image):     
