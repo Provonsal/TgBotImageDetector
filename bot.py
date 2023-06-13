@@ -9,7 +9,7 @@ import shutil
 import sql
 
 # задается токен бота
-bot = telebot.TeleBot('token')
+bot = telebot.TeleBot('токен бота')
 
 # bool для шлюза загрузки, по умолчанию False
 b = 0 
